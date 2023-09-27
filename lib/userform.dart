@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:submissionform/userdetailsscreen.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:submissionform/provider/apidata.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -44,6 +42,10 @@ class _UserformState extends State<Userform> {
             'password': password,
           }));
       print(res.body);
+      globalkey.currentState!.reset();
+      setState(() {
+        selecteddate = null;
+      });
       Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
         return Userdetailsscreen();
       }));
@@ -54,11 +56,11 @@ class _UserformState extends State<Userform> {
     final now = DateTime.now();
     // final firstDate = DateTime(now.year - 1, now.month, now.day);
     final pickdate = await showDatePicker(
-        context: context,
-        initialDate: now,
-      firstDate: DateTime(1800),
-      lastDate: DateTime(2050),
-     );
+      context: context,
+      initialDate: now,
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2025),
+    );
     setState(() {
       selecteddate = pickdate;
     });
@@ -68,6 +70,7 @@ class _UserformState extends State<Userform> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.black54,
         title: Text('Registeration form'),
       ),
       body: Padding(
@@ -82,26 +85,19 @@ class _UserformState extends State<Userform> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     TextFormField(
-                autovalidateMode:AutovalidateMode.always,
-                      decoration: InputDecoration(
-                        labelText: "Firstname"
-
-                     ),
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      decoration: InputDecoration(labelText: "Firstname"),
                       validator: (value) {
-                        if(value == '')
-                          {
-                            return 'required';
-                          }
-                        if ( value!.trim().length < 3 ) {
-                          return 'name should be gretter than 3 characters';
+                        if (value == '') {
+                          return 'required';
                         }
-                        if(value!.trim().length>10){
-                          return 'name should be less than 10 characters';
 
+                        if (value!.trim().length > 20) {
+                          return 'name should be less than 20 characters';
                         }
-                          if (!RegExp(r"^[a-zA-Z]+$").hasMatch(value!)) {
-                            return 'any special character,number,whitespace are not allowed';
-                          }
+                        if (!RegExp(r"^[a-zA-Z ]+$").hasMatch(value!)) {
+                          return 'any special character,number,whitespace are not allowed';
+                        }
 
                         return null;
                       },
@@ -110,24 +106,19 @@ class _UserformState extends State<Userform> {
                       },
                     ),
                     TextFormField(
-                      autovalidateMode:AutovalidateMode.always,
-
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                       decoration: InputDecoration(
                         label: Text('LastName'),
                       ),
                       validator: (value) {
-                          if(value=='')
-                            {
-                              return 'required';
-                            }
-                        if ( value!.trim().length < 3 ) {
-                          return 'name should be gretter than 3 characters';
+                        if (value == '') {
+                          return 'required';
                         }
-                        if(value!.trim().length>10){
-                          return 'name should be less than 10 characters';
+                        if (value!.trim().length > 20) {
+                          return 'name should be less than 20 characters';
+                        }
 
-                        }
-                        if (!RegExp(r"^[a-zA-Z]+$").hasMatch(value!)) {
+                        if (!RegExp(r"^[a-zA-Z ]+$").hasMatch(value!)) {
                           return 'any special character and numbers are not allowed';
                         }
                         return null;
@@ -137,31 +128,20 @@ class _UserformState extends State<Userform> {
                       },
                     ),
                     TextFormField(
-                      autovalidateMode:AutovalidateMode.always,
-
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                       decoration: InputDecoration(
                         label: Text('Email'),
                       ),
                       validator: (value) {
                         //email validation logic
-                        if(value=='')
-                          {
-                            return 'required';
-                          }
-                        if ( value!.trim().length < 10 ) {
-                          return 'email should be gretter than 10 characters';
+                        if (value == '') {
+                          return 'required';
                         }
-                        if(value!.trim().length>30){
-                          return 'email should be less than 30 characters';
 
-                        }
-                                                if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value!)) {
+                        if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value!)) {
                           return 'email not valid';
                         }
-                        // if(value.characters!='@gmail.com')
-                        //   {
-                        //     return 'invalid email address';
-                        //   }
+
                         return null;
                       },
                       onSaved: (value) {
@@ -181,25 +161,19 @@ class _UserformState extends State<Userform> {
                     IconButton(
                         onPressed: showdate, icon: Icon(Icons.calendar_month)),
                     TextFormField(
-                        autovalidateMode:AutovalidateMode.always,
-
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
                         decoration: InputDecoration(
                           label: Text('Address'),
                         ),
                         validator: (value) {
-                          if(value == '')
-                          {
+                          if (value == '') {
                             return 'required';
                           }
 
-                          if ( value!.trim().length < 3 ) {
-                          return 'address should be gretter than 3 characters';
+                          if (value!.trim().length > 20) {
+                            return 'address should be less than 20 characters';
                           }
-                          if(value!.trim().length>20){
-                          return 'address should be less than 10 characters';
-
-                          }
-                          if (!RegExp(r"^[a-zA-Z]+$").hasMatch(value!)) {
+                          if (!RegExp(r"^[a-zA-Z ]+$").hasMatch(value!)) {
                             return 'any special character,numbers,whitespaces are not allowed';
                           }
                           return null;
@@ -208,29 +182,23 @@ class _UserformState extends State<Userform> {
                           address = value!;
                         }),
                     TextFormField(
-                      autovalidateMode:AutovalidateMode.always,
-
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                       obscureText: true,
                       controller: _pass,
                       decoration: InputDecoration(
-                          // hintText: "Enter Password Here",
-                          // labelText: "Password"
-
-                          label: Text('Password'),
+                        label: Text('Password'),
                       ),
                       validator: (value) {
-                        var pass = value;
+                        // var pass = value;
                         var regv =
                             RegExp(r"(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*\W)");
-                        if(value=='')
-                          {
-                            return 'required';
-                          }
-                        if(value!.trim().length<6 )
-                          {
-                            return 'password should be gretter than 6 characters';
-                          }
-                        if ( value!.trim().length >12) {
+                        if (value == '') {
+                          return 'required';
+                        }
+                        if (value!.trim().length < 6) {
+                          return 'password should be greater than 6 characters';
+                        }
+                        if (value!.trim().length > 12) {
                           return 'password should be less than 12 characters';
                         }
                         if (!regv.hasMatch(value)) {
@@ -245,17 +213,15 @@ class _UserformState extends State<Userform> {
                     ),
                     TextFormField(
                       obscureText: true,
-                      autovalidateMode:AutovalidateMode.always,
-
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                       controller: _confirmPass,
                       decoration: InputDecoration(
                         label: Text('Confirm password'),
                       ),
                       validator: (value) {
-                        if(value=='')
-                          {
-                            return 're-enter password';
-                          }
+                        if (value == '') {
+                          return 're-enter password';
+                        }
                         if (value != _pass.text) {
                           return 'password should be match to previous ';
                         }
@@ -268,16 +234,28 @@ class _UserformState extends State<Userform> {
                             onPressed: () {
                               setvalidate();
                             },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  Colors.black54, // Background color
+                            ),
                             child: Padding(
                               padding: const EdgeInsets.all(10.0),
                               child: Text('Submit'),
                             )),
-                        SizedBox(width: 20,),
+                        SizedBox(
+                          width: 20,
+                        ),
                         ElevatedButton(
                             onPressed: () {
                               globalkey.currentState!.reset();
-
+                              setState(() {
+                                selecteddate = null;
+                              });
                             },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  Colors.black54, // Background color
+                            ),
                             child: Padding(
                               padding: const EdgeInsets.all(10.0),
                               child: Text('Reset'),

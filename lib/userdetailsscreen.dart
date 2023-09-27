@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+import 'package:submissionform/landingscreen.dart';
 import 'dart:convert';
 import 'package:submissionform/str.dart';
 import 'package:submissionform/updatescreen.dart';
@@ -14,7 +18,7 @@ class Userdetailsscreen extends StatefulWidget {
 
 class _UserdetailsscreenState extends State<Userdetailsscreen> {
   var isloader = true;
-  var upd = {};
+
   String? err;
   List<Structure> initiallist = [];
 
@@ -26,9 +30,6 @@ class _UserdetailsscreenState extends State<Userdetailsscreen> {
   }
 
   void api() async {
-    // setState(() {
-    //   isloader = true;
-    // });
     var url = Uri.https(
         'user-details-14898-default-rtdb.firebaseio.com', '/userdata.json');
     final res = await http.get(url);
@@ -39,21 +40,11 @@ class _UserdetailsscreenState extends State<Userdetailsscreen> {
       });
       return;
     }
-    // if(res.body=='null')
-    // {
-    //   setState(() {
-    //     isloader=false;
-    //     err ='no data found';
-    //
-    //   });
-    //   return;
-    // }
     final Map<String, dynamic> result = json.decode(res.body);
 
     final List<Structure> newlist = [];
     for (final user in result.entries) {
-      // print('value${user.value['password']}');
-      // if(user.value['email']!=widget.email)
+      print('value${user.value['name']}');
 
       newlist.add(Structure(
           id: user.key,
@@ -62,18 +53,15 @@ class _UserdetailsscreenState extends State<Userdetailsscreen> {
           address: user.value['address'],
           email: user.value['email'],
           password: user.value['password'],
-          date: user.value['date']));
-
-      // else{
-      //   //already exist
-      // }
-      // print('id${user.key}');
+          date: user.value['date'] != null
+              ? DateTime.parse(user.value['date'])
+              : user.value['date']));
     }
-print('list$newlist');
+
     setState(() {
       initiallist = newlist;
+      print('list$newlist');
       isloader = false;
-      print('newlist$initiallist');
     });
   }
 
@@ -81,68 +69,47 @@ print('list$newlist');
     var url = Uri.https('user-details-14898-default-rtdb.firebaseio.com',
         '/userdata/${dlist.id}.json');
     http.delete(url);
-    // setState(() {
-    //   isloader = true;
-    // });
 
-    // api();
     setState(() {
-      initiallist.remove(dlist);
+      isloader = true;
+      Timer(Duration(seconds: 2), () => api());
     });
   }
 
   void edit(elist) async {
-    var upd =
+    var istrue =
         await Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
+      var newDate = elist.date.toString();
       return Updatescreen(
+          id: elist.id,
           name: elist.name,
           sname: elist.sname,
           password: elist.password,
           address: elist.address,
-          date: elist.date,
+          date: newDate,
           email: elist.email);
     }));
 
-    print('upd${upd['name']}');
-    var url = Uri.https('user-details-14898-default-rtdb.firebaseio.com',
-        '/userdata/${elist.id}.json');
-    http.put(url,
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'name': upd['name'],
-          'sname': upd['sname'],
-          'email': upd['email'],
-          'address': upd['address'],
-          'date': upd['date'].toString(),
-          'password': upd['password'],
-        }));
-
-    // final List<Structure> newlist2 = [];
-    //
-    // newlist2.add(Structure(
-    //     id: elist.id,
-    //     name: upd['name'],
-    //     sname: upd['sname'],
-    //     address: upd['address'],
-    //     email: upd['email'],
-    //     password: upd['password'],
-    //     date: upd['date']));
-    // // print('id${user.key}');
-    //
-    // setState(() {
-    //   initiallist = newlist2;
-    //   // print('newlist$initiallist');
-    // });
-    api();
-    if (mounted) Navigator.pop(context, true);
+    if (istrue == true) {
+      setState(() {
+        isloader = true;
+      });
+      Timer(Duration(seconds: 2), () => api());
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text('user details')),
+        appBar: AppBar(
+          title: Text('user details'),
+          backgroundColor: Colors.black54,
+        ),
         body: isloader
-            ? Center(child: CircularProgressIndicator())
+            ? Center(
+                child: CircularProgressIndicator(
+                color: Colors.black54,
+              ))
             : err != null
                 ? Center(child: Text('$err!'))
                 : ListView.builder(
@@ -170,7 +137,7 @@ print('list$newlist');
                                     style: GoogleFonts.aBeeZee(),
                                   ),
                                   Text(
-                                    'Date: ${initiallist[index].date!.toString()}',
+                                    'Date ${initiallist[index].date != null ? intl.format(initiallist[index].date!).toString() : ''}',
                                     style: GoogleFonts.aBeeZee(),
                                   ),
                                   Text(
@@ -204,11 +171,11 @@ print('list$newlist');
                                                       onPressed: () =>
                                                           Navigator.pop(
                                                               context, false),
-                                                      child: Text(
-                                                        'Cancel',
-                                                        style: GoogleFonts
-                                                            .aBeeZee(),
-                                                      ),
+                                                      child: Text('Cancel',
+                                                          style: TextStyle(
+                                                            color:
+                                                                Colors.black54,
+                                                          )),
                                                     ),
                                                     TextButton(
                                                         onPressed: () {
@@ -218,63 +185,25 @@ print('list$newlist');
                                                               context);
                                                           // Navigator.pop(context, true)
                                                         },
-                                                        child: Text(
-                                                          'Delete',
-                                                          style: GoogleFonts
-                                                              .aBeeZee(),
-                                                        )),
+                                                        child: Text('Delete',
+                                                            style: TextStyle(
+                                                              color: Colors
+                                                                  .black54,
+                                                            ))),
                                                   ]),
                                             );
                                           },
                                           icon: Icon(
                                             Icons.delete,
-                                            color: Colors.blue,
+                                            color: Colors.black54,
                                           )),
                                       IconButton(
                                           onPressed: () {
-                                            showDialog(
-                                              context: context,
-                                              builder: (context) => AlertDialog(
-                                                  title: Text(
-                                                    'Are you sure?',
-                                                    style:
-                                                        GoogleFonts.aBeeZee(),
-                                                  ),
-                                                  content: Text(
-                                                      'This action will permanently edit this data',
-                                                    style: GoogleFonts.aBeeZee(),
-
-                                                  ),
-                                                  actions: [
-                                                    TextButton(
-                                                      onPressed: () =>
-                                                          Navigator.pop(
-                                                              context, false),
-                                                      child:
-                                                           Text('Cancel',
-                                                             style: GoogleFonts.aBeeZee(),
-
-                                                           ),
-                                                    ),
-                                                    SizedBox(width: 30),
-                                                    TextButton(
-                                                        onPressed: () {
-                                                          edit(initiallist[
-                                                              index]);
-
-                                                          // Navigator.pop(context, true)
-                                                        },
-                                                        child:
-                                                            Text('Edit',
-                                                              style: GoogleFonts.aBeeZee(),
-
-                                                            )),
-                                                  ]),
-                                            );
+                                            edit(initiallist[index]);
                                           },
                                           icon: Icon(
                                             Icons.edit,
-                                            color: Colors.blue,
+                                            color: Colors.black54,
                                           )),
                                     ],
                                   )

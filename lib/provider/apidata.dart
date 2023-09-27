@@ -14,6 +14,7 @@ class ApidataNotifier extends StateNotifier<Map<String,String>>{
        'Name': value['name'], 'Lastname': value['sname'], 'Email': value['email'],'Address':value['address'],'Date':value['date'],'Password':value['password']},
 
    ));
+
    // final result=json.decode(res.body);
    // state={res,...state};
    // print(res.body);
