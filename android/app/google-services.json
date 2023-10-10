@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "468181108142",
+    "firebase_url": "https://user-details-14898-default-rtdb.firebaseio.com",
+    "project_id": "user-details-14898",
+    "storage_bucket": "user-details-14898.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:468181108142:android:3f6871908e9623ac60b43f",
+        "android_client_info": {
+          "package_name": "com.example.submissionform"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0HoezZ966AdpHgBWcrrzng9wCijT1tLU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,10 +1,13 @@
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:submissionform/imageupload.dart';
 import 'package:submissionform/userdetailsscreen.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:submissionform/str.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io';
 
 class Userform extends StatefulWidget {
@@ -24,11 +27,22 @@ class _UserformState extends State<Userform> {
   var email = '';
   var address = '';
   var password = '';
+  File? selectedimg;
+  var add = 'file';
   final intl = DateFormat.yMd();
   DateTime? selecteddate;
   void setvalidate() async {
     if (globalkey.currentState!.validate()) {
       globalkey.currentState!.save();
+
+      final storagefolder = FirebaseStorage.instance
+          .ref()
+          .child('user-details')
+          .child('${name}.jpg');
+      print(storagefolder);
+      await storagefolder.putFile(selectedimg!);
+      final imgurl = await storagefolder.getDownloadURL();
+      print(imgurl);
       var url = Uri.https(
           'user-details-14898-default-rtdb.firebaseio.com', '/userdata.json');
       final res = await http.post(url,
@@ -40,6 +54,7 @@ class _UserformState extends State<Userform> {
             'address': address,
             'date': selecteddate.toString(),
             'password': password,
+            'img': imgurl
           }));
       print(res.body);
       globalkey.currentState!.reset();
@@ -84,6 +99,14 @@ class _UserformState extends State<Userform> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Center(
+                        child: Imageupload(
+                      id: add,
+                      img: name,
+                      onclick: (pickimg) {
+                        selectedimg = pickimg;
+                      },
+                    )),
                     TextFormField(
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       decoration: InputDecoration(labelText: "Firstname"),

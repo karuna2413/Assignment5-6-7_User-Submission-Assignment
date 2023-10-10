@@ -1,9 +1,12 @@
 import 'dart:convert';
 
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:submissionform/str.dart';
+import 'dart:io';
+import 'imageupload.dart';
 
 class Updatescreen extends StatefulWidget {
   Updatescreen(
@@ -13,8 +16,8 @@ class Updatescreen extends StatefulWidget {
       required this.email,
       required this.address,
       required this.password,
+      required this.img,
       required this.date});
-  // List initiallist;
   String id;
   String name;
   String sname;
@@ -22,13 +25,15 @@ class Updatescreen extends StatefulWidget {
   String address;
   String password;
   String date;
-
+  String img;
   @override
   State<Updatescreen> createState() => _UpdatescreenState();
 }
 
 class _UpdatescreenState extends State<Updatescreen> {
-  var name1, sname1, email1, address1, password1, date1, id1;
+  var name1, sname1, email1, address1, password1, date1, id1, img1;
+  File? selectedimg;
+  var edit = 'network';
   @override
   void initState() {
     id1 = widget.id;
@@ -36,7 +41,7 @@ class _UpdatescreenState extends State<Updatescreen> {
     sname1 = widget.sname;
     email1 = widget.email;
     date1 = widget.date;
-
+    img1 = widget.img;
     address1 = widget.address;
     password1 = widget.password;
     // TODO: implement initState
@@ -63,13 +68,21 @@ class _UpdatescreenState extends State<Updatescreen> {
     });
   }
 
-  void savechng() {
+  void savechng() async {
     Navigator.pop(context);
     if (globalkey.currentState!.validate()) {
       globalkey.currentState!.save();
       if (selecteddate != null) {
         date1 = selecteddate.toString();
       }
+      final storagefolder = FirebaseStorage.instance
+          .ref()
+          .child('user-details')
+          .child('${name1}.jpg');
+      print(storagefolder);
+      await storagefolder.putFile(selectedimg!);
+      final imgurl = await storagefolder.getDownloadURL();
+      print(imgurl);
       var url = Uri.https('user-details-14898-default-rtdb.firebaseio.com',
           '/userdata/${id1}.json');
       http.put(url,
@@ -79,6 +92,7 @@ class _UpdatescreenState extends State<Updatescreen> {
             'sname': sname1,
             'email': email1,
             'address': address1,
+            'img': imgurl,
             'date': DateTime.parse(date1).toString(),
             'password': password1,
           }));
@@ -106,6 +120,17 @@ class _UpdatescreenState extends State<Updatescreen> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Center(
+                          child: Imageupload(
+                        id: edit,
+                        img: img1,
+                        onclick: (pickimg) {
+                          selectedimg = pickimg;
+                        },
+                      )),
+                      SizedBox(
+                        height: 20,
+                      ),
                       TextFormField(
                         autovalidateMode: AutovalidateMode.onUserInteraction,
                         initialValue: name1,

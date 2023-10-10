@@ -10,7 +10,8 @@ class Structure {
       required this.address,
       required this.email,
       required this.password,
-      required this.date});
+      required this.date,
+      required this.img});
   String? id;
   String? name;
   String? sname;
@@ -18,6 +19,7 @@ class Structure {
   String? password;
   String? email;
   DateTime? date;
+  String? img;
   String get formatdate {
     return intl.format(date!);
   }

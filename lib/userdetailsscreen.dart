@@ -53,6 +53,7 @@ class _UserdetailsscreenState extends State<Userdetailsscreen> {
           address: user.value['address'],
           email: user.value['email'],
           password: user.value['password'],
+          img: user.value['img'],
           date: user.value['date'] != null
               ? DateTime.parse(user.value['date'])
               : user.value['date']));
@@ -87,7 +88,8 @@ class _UserdetailsscreenState extends State<Userdetailsscreen> {
           password: elist.password,
           address: elist.address,
           date: newDate,
-          email: elist.email);
+          email: elist.email,
+          img: elist.img);
     }));
 
     if (istrue == true) {
@@ -124,6 +126,15 @@ class _UserdetailsscreenState extends State<Userdetailsscreen> {
                             child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  CircleAvatar(
+                                    radius: 50,
+                                    backgroundColor: Colors.black45,
+                                    backgroundImage: NetworkImage(
+                                        initiallist[index].img.toString()),
+                                  ),
+                                  SizedBox(
+                                    height: 20,
+                                  ),
                                   Text(
                                     'Name: ${initiallist[index].name!}',
                                     style: GoogleFonts.aBeeZee(),

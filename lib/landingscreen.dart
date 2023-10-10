@@ -15,8 +15,6 @@ class _LandingscreenState extends State<Landingscreen> {
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.black54,
-
-          // title: Text('App'),
           actions: [
             TextButton.icon(
               onPressed: () {
