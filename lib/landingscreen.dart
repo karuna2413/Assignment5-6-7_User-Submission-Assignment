@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:submissionform/loginpage.dart';
 import 'package:submissionform/userdetailsscreen.dart';
 import 'package:submissionform/userform.dart';
 
@@ -28,13 +29,13 @@ class _LandingscreenState extends State<Landingscreen> {
             TextButton.icon(
               onPressed: () {
                 Navigator.of(context).push(
-                    MaterialPageRoute(builder: (ctx) => Userdetailsscreen()));
+                    MaterialPageRoute(builder: (ctx) => Loginpage()));
               },
               icon: Icon(
-                Icons.list,
+                Icons.login,
                 color: Colors.white,
               ),
-              label: Text('UserList', style: TextStyle(color: Colors.white)),
+              label: Text('Login', style: TextStyle(color: Colors.white)),
             ),
           ],
         ),

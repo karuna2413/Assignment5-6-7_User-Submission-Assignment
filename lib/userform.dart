@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:submissionform/imageupload.dart';
@@ -9,6 +10,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:submissionform/str.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'loginpage.dart';
+final firebase=FirebaseAuth.instance;//create obj of firebase sdk
 
 class Userform extends StatefulWidget {
   const Userform({super.key});
@@ -20,7 +24,7 @@ class Userform extends StatefulWidget {
 class _UserformState extends State<Userform> {
   final TextEditingController _pass = TextEditingController();
   final TextEditingController _confirmPass = TextEditingController();
-
+var isloader=false;
   var globalkey = GlobalKey<FormState>();
   var name = '';
   var sname = '';
@@ -34,36 +38,67 @@ class _UserformState extends State<Userform> {
   void setvalidate() async {
     if (globalkey.currentState!.validate()) {
       globalkey.currentState!.save();
+      try {
+        final usersign = await firebase.createUserWithEmailAndPassword(
+            email: email, password: password);
+        setState(() {
+          isloader=true;
+        });
+        print('sign$usersign');
+        final storagefolder = FirebaseStorage.instance
+            .ref()
+            .child('user-details')
+            .child('${name}.jpg');
+        print(storagefolder);
+        await storagefolder.putFile(selectedimg!);
+        final imgurl = await storagefolder.getDownloadURL();
+        print(imgurl);
+        var url = Uri.https(
+            'user-details-14898-default-rtdb.firebaseio.com', '/userdata.json');
+        final res = await http.post(url,
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({
+              'name': name,
+              'sname': sname,
+              'email': email,
+              'address': address,
+              'date': selecteddate.toString(),
+              'password': password,
+              'img': imgurl
+            }));
+        setState(() {
+          isloader=false;
+        });
+        print(res.body);
+        globalkey.currentState!.reset();
+        setState(() {
+          selecteddate = null;
+        });
+        Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
+          return Loginpage();
+        }));
+        // final storagefolder= FirebaseStorage.instance.ref().child('user-img').child('${usersign.user!.uid}.jpg');
+        // await storagefolder.putFile(selectedimg!);
+        // final imgurl= await storagefolder.getDownloadURL();
+        // print(usersign);
+        // FirebaseFirestore.instance.collection('user').doc(usersign.user!.uid).set({
+        //   'email':email,
+        //   'username':username,
+        //   'img':imgurl
+        // });
+      }
 
-      final storagefolder = FirebaseStorage.instance
-          .ref()
-          .child('user-details')
-          .child('${name}.jpg');
-      print(storagefolder);
-      await storagefolder.putFile(selectedimg!);
-      final imgurl = await storagefolder.getDownloadURL();
-      print(imgurl);
-      var url = Uri.https(
-          'user-details-14898-default-rtdb.firebaseio.com', '/userdata.json');
-      final res = await http.post(url,
-          headers: {'Content-Type': 'application/json'},
-          body: json.encode({
-            'name': name,
-            'sname': sname,
-            'email': email,
-            'address': address,
-            'date': selecteddate.toString(),
-            'password': password,
-            'img': imgurl
-          }));
-      print(res.body);
-      globalkey.currentState!.reset();
-      setState(() {
-        selecteddate = null;
-      });
-      Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
-        return Userdetailsscreen();
-      }));
+      on FirebaseAuthException catch (err) {
+        if (err.code == 'email-already-in-use') {}
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(err.message ?? 'failed authentication')),);
+      }
+      // setState(() {
+      //   isauth=false;
+      // });
+
+
     }
   }
 
@@ -263,7 +298,7 @@ class _UserformState extends State<Userform> {
                             ),
                             child: Padding(
                               padding: const EdgeInsets.all(10.0),
-                              child: Text('Submit'),
+                              child: isloader?CircularProgressIndicator(color: Colors.white,):Text('Submit'),
                             )),
                         SizedBox(
                           width: 20,

@@ -34,8 +34,9 @@ class _ImageuploadState extends State<Imageupload> {
       maxHeight: 1080,
     )) as File;
     if (croppedImage != null) {
-      pickedimg = croppedImage;
-      setState(() {});
+      setState(() {
+        pickedimg = croppedImage;
+      });
       widget.onclick(pickedimg!);
     }
   }
@@ -62,7 +63,9 @@ class _ImageuploadState extends State<Imageupload> {
         if (widget.id == 'network')
           CircleAvatar(
             backgroundColor: Colors.black45,
-            backgroundImage: NetworkImage(widget.img),
+            backgroundImage: pickedimg==null
+                ? NetworkImage(widget.img) as ImageProvider
+                : FileImage(pickedimg!),
             radius: 50,
           ),
         Center(

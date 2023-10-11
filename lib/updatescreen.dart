@@ -18,6 +18,7 @@ class Updatescreen extends StatefulWidget {
       required this.password,
       required this.img,
       required this.date});
+
   String id;
   String name;
   String sname;
@@ -26,6 +27,7 @@ class Updatescreen extends StatefulWidget {
   String password;
   String date;
   String img;
+
   @override
   State<Updatescreen> createState() => _UpdatescreenState();
 }
@@ -34,6 +36,8 @@ class _UpdatescreenState extends State<Updatescreen> {
   var name1, sname1, email1, address1, password1, date1, id1, img1;
   File? selectedimg;
   var edit = 'network';
+  var isloader=false;
+
   @override
   void initState() {
     id1 = widget.id;
@@ -53,6 +57,7 @@ class _UpdatescreenState extends State<Updatescreen> {
   var globalkey = GlobalKey<FormState>();
   final intl = DateFormat.yMd();
   DateTime? selecteddate;
+
   void showdate() async {
     final now = DateTime.now();
 
@@ -72,6 +77,9 @@ class _UpdatescreenState extends State<Updatescreen> {
     Navigator.pop(context);
     if (globalkey.currentState!.validate()) {
       globalkey.currentState!.save();
+      setState(() {
+        isloader=true;
+      });
       if (selecteddate != null) {
         date1 = selecteddate.toString();
       }
@@ -80,8 +88,15 @@ class _UpdatescreenState extends State<Updatescreen> {
           .child('user-details')
           .child('${name1}.jpg');
       print(storagefolder);
-      await storagefolder.putFile(selectedimg!);
-      final imgurl = await storagefolder.getDownloadURL();
+
+var imgurl;
+      if (selectedimg == null) {
+        imgurl = img1;
+      }
+      else{
+        await storagefolder.putFile(selectedimg!);
+        imgurl = await storagefolder.getDownloadURL();
+      }
       print(imgurl);
       var url = Uri.https('user-details-14898-default-rtdb.firebaseio.com',
           '/userdata/${id1}.json');
@@ -96,7 +111,9 @@ class _UpdatescreenState extends State<Updatescreen> {
             'date': DateTime.parse(date1).toString(),
             'password': password1,
           }));
-
+      setState(() {
+        isloader=false;
+      });
       Navigator.of(context).pop(true);
       // );
     }
@@ -214,6 +231,7 @@ class _UpdatescreenState extends State<Updatescreen> {
                       TextFormField(
                         initialValue: password1,
                         autovalidateMode: AutovalidateMode.onUserInteraction,
+                        obscureText: true,
 
                         // controller: _pass,
                         decoration: InputDecoration(
@@ -277,7 +295,7 @@ class _UpdatescreenState extends State<Updatescreen> {
                               backgroundColor:
                                   Colors.black54, // Background color
                             ),
-                            child: Text('save changes')),
+                            child:isloader?CircularProgressIndicator(color: Colors.white,): Text('save changes')),
                       )
                     ]),
               ))),
